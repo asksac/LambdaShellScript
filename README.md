@@ -5,25 +5,31 @@ written as a Bourne shell script (/bin/sh). Deployment of Lambda function and as
 setup is implemented using Terraform. 
 
 AWS Lambda custom runtime can allow application developers who have atypical use-cases or to execute
-serverless functions using non-standard runtime engines that isn't offered by Lambda (e.g. running 
-a Perl runtime). It also offers an ability to run arbitrary Linux shell scripts or binary executables 
-wrapped by simple shell scripts. 
+serverless functions using non-standard runtime engines that aren't offered by Lambda (e.g. using a 
+Perl runtime). It also offers the ability to run arbitrary Linux shell scripts or binary executables 
+launched by simple initialization shell script called the `bootstrap` ([view code here](src/lambda/bootstrap)). 
 
 See here for more information on custom runtime: https://docs.aws.amazon.com/lambda/latest/dg/runtimes-custom.html
 
+# Design
+
+The following diagram shows the design implemented in this project: 
+<br/><img src="diagram.png" width="621"/><br/>
+[Figure 1: AWS architecture diagram with Lambda deployed inside a VPC](diagram.png)
+
 # Testing
 
-**Invoke Lambda from CLI**
+Invoke Lambda from CLI: 
 ```shell
 aws lambda invoke --function-name lambda_sh --invocation-type RequestResponse --payload '{"param1": "test"}' test_response.json --log-type Tail && cat test_response.json
 ```
 
-**Invoke Lambda and retrieve logs**
+Invoke Lambda and retrieve logs: 
 ```shell
 aws lambda invoke --function-name lambda_sh --invocation-type RequestResponse --payload '{"param1": "test"}' test_response.json --log-type Tail --query 'LogResult' --output text |  base64 -d
 ```
 
-**Lambda will return a response object that should look similar to this**
+Lambda will return a response object that should look similar to this:
 ```json
 {
   "runtime": {
